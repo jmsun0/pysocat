@@ -26,7 +26,7 @@ jobs:
 
       - name: Build wheel
         run: python3 setup.py bdist_wheel
-      
+
       - name: Build exe
         run: python3 setup.py bdist_exe
 

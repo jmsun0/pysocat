@@ -2039,7 +2039,7 @@ def main():
 if __name__ == "__main__":
     ...
     # export DEBUG_ARGS=""
-    # export DEBUG_ARGS="tcp-l:1111,reuseadd -"
+    # export DEBUG_ARGS="tcp-l:1111,reuseaddr -"
     # export DEBUG_ARGS="tcp:127.0.0.1:1111 -"
     # export DEBUG_ARGS="tcp:127.0.0.1:9080 tcp-l:2222,reuseaddr"
     # export DEBUG_ARGS="system:'ls -lh /proc/self/fd',fdin=29,fdout=30 -"
