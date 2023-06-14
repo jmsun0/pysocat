@@ -14,22 +14,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-
-      - name: Install requirements
+      - name: Setup environment
         run: |
-          python -m pip install -U pip setuptools wheel nuitka
-          python -m pip install -r requirements.txt
+          apt update
+          apt install -y --no-install-recommends python3 python3-dev ccache gcc
+
+      - name: Install python requirements
+        run: |
+          python3 -m pip install -U pip setuptools wheel nuitka
+          python3 -m pip install -r requirements.txt
 
       - name: Build wheel
-        run: python setup.py bdist_wheel
+        run: python3 setup.py bdist_wheel
       
       - name: Build exe
-        run: python setup.py bdist_exe
+        run: python3 setup.py bdist_exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
