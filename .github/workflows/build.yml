@@ -11,10 +11,10 @@ jobs:
         os: [ubuntu-20.04]
 
     steps:
-      # - name: Setup system
-      #   run: |
-      #     sudo apt update
-      #     sudo apt install -y --no-install-recommends python3 python3-dev gcc
+      - name: Setup system
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends gcc ccache
       
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -37,21 +37,35 @@ jobs:
         run: |
           python3 -m pip install -r requirements.txt -r requirements-dev.txt
       
-      - name: Build executable
-        uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: pysocat.py
-          onefile: true
+      # - name: Build executable
+      #   uses: Nuitka/Nuitka-Action@main
+      #   with:
+      #     nuitka-version: main
+      #     script-name: pysocat.py
+      #     onefile: true
 
 
       # - name: Build wheel
       #   run: python3 setup.py bdist_wheel
+      - name: Setup Environment Variables
+        run: |
+          echo "NUITKA_CACHE_DIR=${{ github.action_path }}/nuitka/cache" >> $GITHUB_ENV
+          echo "PYTHON_VERSION=$(python --version | awk '{print $2}' | cut -d '.' -f 1,2)" >> $GITHUB_ENV
 
-      # - name: Build exe
-      #   run: |
-      #     export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
-      #     python3 setup.py bdist_exe
+      - name: Cache Nuitka cache directory
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.NUITKA_CACHE_DIR }}
+          key: ${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-nuitka-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-
+            ${{ runner.os }}-python-
+            ${{ runner.os }}-
+
+      - name: Build executable
+        run: |
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          python3 setup.py bdist_exe
 
       # - name: Upload artifact
       #   uses: actions/upload-artifact@v3
