@@ -50,7 +50,7 @@ jobs:
       - name: Setup Environment Variables
         run: |
           echo "NUITKA_CACHE_DIR=$PWD/cache/nuitka" >> $GITHUB_ENV
-          echo "PYTHON_VERSION=$(python --version | awk '{print $2}' | cut -d '.' -f 1,2)" >> $GITHUB_ENV
+          echo "PYTHON_VERSION=$(python3 --version | awk '{print $2}' | cut -d '.' -f 1,2)" >> $GITHUB_ENV
 
       - name: Cache Nuitka cache directory
         uses: actions/cache@v3
