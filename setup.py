@@ -96,7 +96,7 @@ class MyBdistEXE(Command):
                 sys.executable,
                 "-m",
                 "nuitka",
-                # "--static-libpython=yes",
+                "--static-libpython=yes",
                 f"--output-filename={exe_name}",
                 main_py_file,
             ]
