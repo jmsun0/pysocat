@@ -96,7 +96,9 @@ class MyBdistEXE(Command):
                 sys.executable,
                 "-m",
                 "nuitka",
-                "--static-libpython=yes",
+                "--standalone",
+                # "--static-libpython=yes",
+                # "--output-dir=.",
                 f"--output-filename={exe_name}",
                 main_py_file,
             ]
@@ -105,7 +107,7 @@ class MyBdistEXE(Command):
             [
                 "bash",
                 "-c",
-                f"tar czvf {dist_dir}/{exe_name}-{PROJECT_VERSION}.tar.gz {exe_name}",
+                f"tar czvf {dist_dir}/{exe_name}-{PROJECT_VERSION}.tar.gz -C {exe_name}.dist {exe_name}",
             ]
         )
 

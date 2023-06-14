@@ -60,4 +60,21 @@ pysocat http://127.0.0.1:1111/pipe/aaa tun:192.168.7.2/24
 pysocat tcp:127.0.0.1:9080 http://127.0.0.1:1111/push/xxx,split
 curl http://127.0.0.1:1111/access/xxx
 ```
+## 手动编译
+### 安装依赖
+```
+pip3 install wheel nuitka
+pip3 install -r requirements.txt
+```
+### wheel打包
+```
+python3 setup.py clean
+python3 setup.py bdist_wheel
+```
+### nuitka打包
+```
+apt update && apt install -y --no-install-recommends python3-dev ccache patchelf gcc
 
+python3 setup.py clean
+python3 setup.py bdist_exe
+```
