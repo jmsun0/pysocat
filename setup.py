@@ -1,6 +1,9 @@
 import os
 import re
+import subprocess
+import sys
 from distutils.command.clean import clean
+from distutils.core import Command
 from distutils.dir_util import remove_tree
 
 from pkg_resources import parse_requirements
@@ -35,17 +38,19 @@ PACKAGES = list(filter(include_package, find_packages()))
 with open("requirements.txt", "r") as f:
     INSTALL_REQUIRES = [str(requirement) for requirement in parse_requirements(f)]
 
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 class MyClean(clean):
     def run(self):
         # clean.run(self)
-        root_dir = os.path.abspath(os.path.dirname(__file__))
-        egg_dir = list(filter(lambda x: x.endswith(".egg-info"), os.listdir(root_dir)))
+
+        egg_dir = list(filter(lambda x: x.endswith(".egg-info"), os.listdir(ROOT_DIR)))
         for directory in [self.build_base, self.bdist_base, *egg_dir]:
             if os.path.exists(directory):
                 remove_tree(directory, dry_run=self.dry_run)
         for package_name in PACKAGES + [""]:
-            dir_path = os.path.join(root_dir, package_name.replace(".", "/"))
+            dir_path = os.path.join(ROOT_DIR, package_name.replace(".", "/"))
             for filename in os.listdir(dir_path):
                 file_path = os.path.join(dir_path, filename)
                 if filename == "__pycache__":
@@ -56,6 +61,53 @@ class MyClean(clean):
                     or filename.endswith(".so")
                 ):
                     os.remove(file_path)
+
+
+class MyBdistEXE(Command):
+    description = "Build executable"
+    user_options = []
+    boolean_options = []
+    sub_commands = []
+
+    def initialize_options(self):
+        ...
+
+    def finalize_options(self):
+        ...
+
+    def run(self):
+        for cmd_name in self.get_sub_commands():
+            self.run_command(cmd_name)
+
+        build_dir = os.path.join(ROOT_DIR, "build/nuitka")
+        dist_dir = os.path.join(ROOT_DIR, "dist")
+        exe_name = "pysocat"
+        main_py_file = os.path.join(ROOT_DIR, "pysocat.py")
+        os.makedirs(build_dir, exist_ok=True)
+        os.makedirs(dist_dir, exist_ok=True)
+
+        sub_args = dict(cwd=build_dir, env=dict(os.environ, PYTHONPATH=ROOT_DIR))
+
+        def run_cmd(cmds):
+            assert subprocess.run(cmds, **sub_args).returncode == 0
+
+        run_cmd(
+            [
+                sys.executable,
+                "-m",
+                "nuitka",
+                "--static-libpython=yes",
+                f"--output-filename={exe_name}",
+                main_py_file,
+            ]
+        )
+        run_cmd(
+            [
+                "bash",
+                "-c",
+                f"tar czvf {dist_dir}/{exe_name}-{PROJECT_VERSION}.tar.gz {exe_name}",
+            ]
+        )
 
 
 if __name__ == "__main__":
@@ -105,5 +157,6 @@ if __name__ == "__main__":
             # "build": MyBuild,
             # "build_ext": MyBuildExt,
             "clean": MyClean,
+            "bdist_exe": MyBdistEXE,
         },
     )
