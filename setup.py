@@ -84,10 +84,17 @@ class MyBdistEXE(Command):
         for cmd_name in self.get_sub_commands():
             self.run_command(cmd_name)
 
-        build_dir = os.path.join(ROOT_DIR, "build/nuitka")
+        build_dir = os.path.join(ROOT_DIR, "build/exe")
         dist_dir = os.path.join(ROOT_DIR, "dist")
         exe_name = "pysocat"
+
+        exe_suffix = ""
+        if PLATFORM_OS == "windows":
+            exe_suffix = ".exe"
+        exe_full_name = f"{exe_name}{exe_suffix}"
+
         main_py_file = os.path.join(ROOT_DIR, "pysocat.py")
+
         os.makedirs(build_dir, exist_ok=True)
         os.makedirs(dist_dir, exist_ok=True)
 
@@ -96,36 +103,51 @@ class MyBdistEXE(Command):
         def run_cmd(cmds):
             assert subprocess.run(cmds, **sub_args).returncode == 0
 
-        exe_suffix = ""
-        if PLATFORM_OS == "windows":
-            exe_suffix = ".exe"
-        exe_full_name = f"{exe_name}{exe_suffix}"
+        package_program = os.environ.get("EXE_PACKAGE_PROGRAM", "pyinstaller")
 
-        run_cmd(
-            [
-                sys.executable,
-                "-m",
-                "nuitka",
-                "--standalone",
-                "--onefile",
-                "--follow-imports",
-                "--static-libpython=yes",
-                # "--output-dir=.",
-                f"--output-filename={exe_full_name}",
-                "--show-scons",
-                "--assume-yes-for-downloads",
-                main_py_file,
-            ]
-        )
+        if package_program == "pyinstaller":
+            run_cmd(
+                [
+                    sys.executable,
+                    "-m",
+                    "PyInstaller",
+                    "--noconfirm",
+                    "-F",
+                    "--clean",
+                    main_py_file,
+                ]
+            )
+            dist_dir = os.path.join(build_dir, "dist")
+            for file in os.listdir(dist_dir):
+                output_file = os.path.join(dist_dir, file)
+                break
+        elif package_program == "nuitka":
+            run_cmd(
+                [
+                    sys.executable,
+                    "-m",
+                    "nuitka",
+                    "--standalone",
+                    "--onefile",
+                    "--follow-imports",
+                    # "--static-libpython=yes",
+                    # "--output-dir=.",
+                    f"--output-filename={exe_full_name}",
+                    "--show-scons",
+                    "--assume-yes-for-downloads",
+                    main_py_file,
+                ]
+            )
+            output_file = f"{build_dir}/{exe_name}.dist/{exe_full_name}"
+        else:
+            raise
 
         with tarfile.open(
             name=f"{dist_dir}/{exe_name}-{PROJECT_VERSION}-{PLATFORM_OS}-{PLATFORM_ARCH}.tar.gz",
             mode='w:gz',
             format=tarfile.GNU_FORMAT,
         ) as tar:
-            tar.add(
-                f"{build_dir}/{exe_name}.dist/{exe_full_name}", arcname=exe_full_name
-            )
+            tar.add(output_file, arcname=exe_full_name)
 
 
 if __name__ == "__main__":
