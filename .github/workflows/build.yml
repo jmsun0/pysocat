@@ -28,14 +28,17 @@ jobs:
           cache-dependency-path: |
             **/requirements*.txt
       
+      - name: Install python requirements
+        run: |
+          python3 -m pip install -r requirements.txt -r requirements-dev.txt
+      
+      - name: Build wheel
+        run: python3 setup.py bdist_wheel
+
       # - name: Setup ccache
       #   uses: hendrikmuhs/ccache-action@v1.2
       #   with:
       #     key: ${{ matrix.os }}-${{ matrix.type }}
-      
-      - name: Install python requirements
-        run: |
-          python3 -m pip install -r requirements.txt -r requirements-dev.txt
       
       # - name: Build executable
       #   uses: Nuitka/Nuitka-Action@main
@@ -44,15 +47,12 @@ jobs:
       #     script-name: pysocat.py
       #     onefile: true
 
-
-      # - name: Build wheel
-      #   run: python3 setup.py bdist_wheel
-      - name: Setup Environment Variables
+      - name: Setup Nuitka Environment Variables
         run: |
           echo "NUITKA_CACHE_DIR=$PWD/cache/nuitka" >> $GITHUB_ENV
           echo "PYTHON_VERSION=$(python3 --version | awk '{print $2}' | cut -d '.' -f 1,2)" >> $GITHUB_ENV
 
-      - name: Cache Nuitka cache directory
+      - name: Cache Nuitka directory
         uses: actions/cache@v3
         with:
           path: ${{ env.NUITKA_CACHE_DIR }}
@@ -67,16 +67,16 @@ jobs:
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
           python3 setup.py bdist_exe
 
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     path: ./dist/*
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./dist/*
 
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   with:
-      #     files: ./dist/*
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./dist/*
 
 # git tag -d 0.0.1
 # git push --delete origin 0.0.1
