@@ -8,16 +8,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # [ubuntu-20.04, windows-2019, macOS-11]
-        os: [windows-2019]
+        os: [ubuntu-20.04]
 
     steps:
-      - name: Setup system
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt update
-          sudo apt install -y --no-install-recommends ccache
-      
       - name: Checkout repository
         uses: actions/checkout@v3
       
@@ -37,6 +30,49 @@ jobs:
       - name: Build wheel
         run: python3 setup.py bdist_wheel
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./dist/*
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./dist/*
+
+  build_exe:
+    name: Build exe on ${{ matrix.os }}
+    # if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # [ubuntu-20.04, windows-2019, macOS-11]
+        os: [ubuntu-20.04,windows-2019]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup system
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends ccache
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          architecture: 'x64'
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+      
+      - name: Install python requirements
+        run: |
+          python3 -m pip install -r requirements.txt -r requirements-dev.txt
+      
       # - name: Setup ccache
       #   uses: hendrikmuhs/ccache-action@v1.2
       #   with:

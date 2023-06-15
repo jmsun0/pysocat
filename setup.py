@@ -99,6 +99,7 @@ class MyBdistEXE(Command):
                 "--standalone",
                 # "--static-libpython=yes",
                 # "--output-dir=.",
+                "--assume-yes-for-downloads",
                 f"--output-filename={exe_name}",
                 main_py_file,
             ]
