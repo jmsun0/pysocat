@@ -79,12 +79,12 @@ jobs:
       #   with:
       #     key: ${{ matrix.os }}-${{ matrix.type }}
       
-      - name: Build executable
-        uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: pysocat.py
-          onefile: true
+      # - name: Build executable
+      #   uses: Nuitka/Nuitka-Action@main
+      #   with:
+      #     nuitka-version: main
+      #     script-name: pysocat.py
+      #     onefile: true
 
       # - name: Setup Nuitka Environment Variables
       #   shell: bash
@@ -92,24 +92,24 @@ jobs:
       #     echo "NUITKA_CACHE_DIR=$PWD/cache/nuitka" >> $GITHUB_ENV
       #     echo "PYTHON_VERSION=$(python3 --version | awk '{print $2}' | cut -d '.' -f 1,2)" >> $GITHUB_ENV
 
-      # - name: Cache Nuitka directory
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ${{ env.NUITKA_CACHE_DIR }}
-      #     key: ${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-nuitka-${{ github.sha }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-
-      #       ${{ runner.os }}-python-
-      #       ${{ runner.os }}-
+      - name: Cache Nuitka directory
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.NUITKA_CACHE_DIR }}
+          key: ${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-nuitka-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-
+            ${{ runner.os }}-python-
+            ${{ runner.os }}-
 
-      # - name: Build executable
-      #   run: |
-      #     python3 setup.py bdist_exe
+      - name: Build executable
+        run: |
+          python3 setup.py bdist_exe
 
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     path: ./dist/*
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./dist/*
 
       # - name: Release
       #   uses: softprops/action-gh-release@v1

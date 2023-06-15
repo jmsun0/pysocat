@@ -45,6 +45,7 @@ PLATFORM = (
     platform.system() + "-" + platform.machine().lower().replace("amd64", "x86_64")
 )
 
+
 class MyClean(clean):
     def run(self):
         # clean.run(self)
@@ -101,6 +102,8 @@ class MyBdistEXE(Command):
                 "-m",
                 "nuitka",
                 "--standalone",
+                "--onefile",
+                "--show-scons",
                 # "--static-libpython=yes",
                 # "--output-dir=.",
                 "--assume-yes-for-downloads",
