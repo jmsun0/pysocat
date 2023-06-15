@@ -117,9 +117,9 @@ class MyBdistEXE(Command):
                     main_py_file,
                 ]
             )
-            dist_dir = os.path.join(build_dir, "dist")
-            for file in os.listdir(dist_dir):
-                output_file = os.path.join(dist_dir, file)
+            build_dist_dir = os.path.join(build_dir, "dist")
+            for file in os.listdir(build_dist_dir):
+                output_file = os.path.join(build_dist_dir, file)
                 break
         elif package_program == "nuitka":
             run_cmd(
