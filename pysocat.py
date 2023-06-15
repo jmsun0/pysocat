@@ -2,11 +2,11 @@
 import argparse
 import asyncio
 import base64
-import fcntl
 import inspect
 import json
 import logging
 import os
+import platform
 import signal
 import socket
 import stat
@@ -1277,6 +1277,12 @@ class WebsocketServerPipe(Pipe):
         )
 
 
+def ioctl(fd: int, flags: str, data: bytes):
+    import fcntl
+
+    fcntl.ioctl(fd, flags, data)
+
+
 def create_tun(dev_name: str, tun_type: str):
     IFF_TUN = 0x1
     IFF_TAP = 0x2
@@ -1291,13 +1297,13 @@ def create_tun(dev_name: str, tun_type: str):
         raise
     flags = flags | IFF_NO_PI
     ifreq = struct.pack("16sH22s", dev_name.encode(), flags, b"")
-    fcntl.ioctl(tun_fd, TUNSETIFF, ifreq)
+    ioctl(tun_fd, TUNSETIFF, ifreq)
     return tun_fd
 
 
 def socket_ioctl(flags: str, data: bytes):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        fcntl.ioctl(sock, flags, data)
+        ioctl(sock, flags, data)
 
 
 def set_nic_ip_address(dev_name: str, ip: str, peer=False):
@@ -2002,8 +2008,9 @@ def app_main(*args, **kwargs):
         for task in asyncio.all_tasks(loop):
             task.cancel()
 
-    for sig in [signal.SIGINT, signal.SIGTERM]:
-        loop.add_signal_handler(sig, lambda: shutdown(sig))
+    if platform.system() != "Windows":
+        for sig in [signal.SIGINT, signal.SIGTERM]:
+            loop.add_signal_handler(sig, lambda: shutdown(sig))
 
     try:
         return loop.run_until_complete(async_app_main(*args, **kwargs))
@@ -2013,6 +2020,7 @@ def app_main(*args, **kwargs):
         loop.run_until_complete(loop.shutdown_asyncgens())
         loop.stop()
         loop.close()
+
 
 def main():
     DEBUG_ARGS = os.environ.get("DEBUG_ARGS", "")
@@ -2035,6 +2043,7 @@ def main():
         help="Verbose log",
     )
     app_main(**vars(parser.parse_args()))
+
 
 if __name__ == "__main__":
     ...

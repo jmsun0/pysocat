@@ -96,6 +96,11 @@ class MyBdistEXE(Command):
         def run_cmd(cmds):
             assert subprocess.run(cmds, **sub_args).returncode == 0
 
+        exe_suffix = ""
+        if PLATFORM_OS == "windows":
+            exe_suffix = ".exe"
+        exe_full_name = f"{exe_name}{exe_suffix}"
+
         run_cmd(
             [
                 sys.executable,
@@ -103,25 +108,23 @@ class MyBdistEXE(Command):
                 "nuitka",
                 "--standalone",
                 "--onefile",
+                "--follow-imports",
                 # "--static-libpython=yes",
                 # "--output-dir=.",
-                f"--output-filename={exe_name}",
+                f"--output-filename={exe_full_name}",
                 "--show-scons",
                 "--assume-yes-for-downloads",
                 main_py_file,
             ]
         )
 
-        exe_suffix = ""
-        if PLATFORM_OS == "windows":
-            exe_suffix = ".exe"
-
         with tarfile.open(
             name=f"{dist_dir}/{exe_name}-{PROJECT_VERSION}-{PLATFORM_OS}-{PLATFORM_ARCH}.tar.gz",
             mode='w:gz',
+            format=tarfile.GNU_FORMAT,
         ) as tar:
             tar.add(
-                f"{build_dir}/{exe_name}.dist/{exe_name}{exe_suffix}", arcname=exe_name
+                f"{build_dir}/{exe_name}.dist/{exe_full_name}", arcname=exe_full_name
             )
 
 
