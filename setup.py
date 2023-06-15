@@ -3,6 +3,7 @@ import platform
 import re
 import subprocess
 import sys
+import tarfile
 from distutils.command.clean import clean
 from distutils.core import Command
 from distutils.dir_util import remove_tree
@@ -41,9 +42,8 @@ with open("requirements.txt", "r") as f:
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
-PLATFORM = (
-    platform.system() + "-" + platform.machine().lower().replace("amd64", "x86_64")
-)
+PLATFORM_OS = platform.system().lower()
+PLATFORM_ARCH = platform.machine().lower().replace("amd64", "x86_64")
 
 
 class MyClean(clean):
@@ -103,21 +103,26 @@ class MyBdistEXE(Command):
                 "nuitka",
                 "--standalone",
                 "--onefile",
-                "--show-scons",
                 # "--static-libpython=yes",
                 # "--output-dir=.",
-                "--assume-yes-for-downloads",
                 f"--output-filename={exe_name}",
+                "--show-scons",
+                "--assume-yes-for-downloads",
                 main_py_file,
             ]
         )
-        run_cmd(
-            [
-                "bash",
-                "-c",
-                f"tar czvf {dist_dir}/{exe_name}-{PROJECT_VERSION}-{PLATFORM}.tar.gz -C {exe_name}.dist {exe_name}",
-            ]
-        )
+
+        exe_suffix = ""
+        if PLATFORM_OS == "windows":
+            exe_suffix = ".exe"
+
+        with tarfile.open(
+            name=f"{dist_dir}/{exe_name}-{PROJECT_VERSION}-{PLATFORM_OS}-{PLATFORM_ARCH}.tar.gz",
+            mode='w:gz',
+        ) as tar:
+            tar.add(
+                f"{build_dir}/{exe_name}.dist/{exe_name}{exe_suffix}", arcname=exe_name
+            )
 
 
 if __name__ == "__main__":
