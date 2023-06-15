@@ -50,6 +50,7 @@ jobs:
       #     onefile: true
 
       - name: Setup Nuitka Environment Variables
+        shell: bash
         run: |
           echo "NUITKA_CACHE_DIR=$PWD/cache/nuitka" >> $GITHUB_ENV
           echo "PYTHON_VERSION=$(python3 --version | awk '{print $2}' | cut -d '.' -f 1,2)" >> $GITHUB_ENV
