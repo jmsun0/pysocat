@@ -42,8 +42,8 @@ jobs:
           files: ./dist/*
 
   build_exe:
-    name: Build exe on ${{ matrix.os }}
     if: startsWith(github.ref, 'refs/tags/')
+    name: Build exe on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
