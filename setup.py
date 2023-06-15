@@ -109,7 +109,7 @@ class MyBdistEXE(Command):
                 "--standalone",
                 "--onefile",
                 "--follow-imports",
-                # "--static-libpython=yes",
+                "--static-libpython=yes",
                 # "--output-dir=.",
                 f"--output-filename={exe_full_name}",
                 "--show-scons",

@@ -10,7 +10,7 @@ pip3 install https://github.com/jmsun0/pysocat/releases/download/0.0.1/pysocat-0
 ```
 ### 打包的二进制执行文件（ubuntu-20以上）
 ```bash
-curl -sSfL https://github.com/jmsun0/pysocat/releases/download/0.0.1/pysocat-0.0.1.tar.gz | tar xzf - -C /bin/
+curl -sSfL https://github.com/jmsun0/pysocat/releases/download/0.0.1/pysocat-0.0.1-linux-x86_64.tar.gz | tar xzf - -C /bin/
 ```
 ## 使用
 ------
