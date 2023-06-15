@@ -8,13 +8,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        # [ubuntu-20.04, windows-2019, macOS-11]
+        os: [windows-2019]
 
     steps:
       - name: Setup system
+        if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install -y --no-install-recommends gcc ccache
+          sudo apt install -y --no-install-recommends ccache
       
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -64,7 +66,6 @@ jobs:
 
       - name: Build executable
         run: |
-          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
           python3 setup.py bdist_exe
 
       - name: Upload artifact
