@@ -1,4 +1,5 @@
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -40,6 +41,9 @@ with open("requirements.txt", "r") as f:
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
+PLATFORM = (
+    platform.system() + "-" + platform.machine().lower().replace("amd64", "x86_64")
+)
 
 class MyClean(clean):
     def run(self):
@@ -108,7 +112,7 @@ class MyBdistEXE(Command):
             [
                 "bash",
                 "-c",
-                f"tar czvf {dist_dir}/{exe_name}-{PROJECT_VERSION}.tar.gz -C {exe_name}.dist {exe_name}",
+                f"tar czvf {dist_dir}/{exe_name}-{PROJECT_VERSION}-{PLATFORM}.tar.gz -C {exe_name}.dist {exe_name}",
             ]
         )
 
