@@ -506,16 +506,23 @@ class SplitSubStreamWriter(AbstractWriter):
         await self.split_stream.close_session(self.session_id)
 
 
+def asyncio_all_tasks(loop=None):
+    if sys.version_info.major > 6:
+        return asyncio.all_tasks(loop=loop)
+    else:
+        return asyncio.Task.all_tasks(loop=loop)
+
+
 last_tasks = None
 
 
 def record_tasks():
     global last_tasks
-    last_tasks = asyncio.all_tasks()
+    last_tasks = asyncio_all_tasks()
 
 
 def diff_tasks():
-    current_tasks = asyncio.all_tasks()
+    current_tasks = asyncio_all_tasks()
     last_task_map = {k.get_name(): k for k in last_tasks}
     current_task_map = {k.get_name(): k for k in current_tasks}
     logging.debug("diff_tasks==================================================")
@@ -2005,7 +2012,7 @@ def app_main(*args, **kwargs):
     loop = asyncio.new_event_loop()
 
     def shutdown(sig: signal.Signals) -> None:
-        for task in asyncio.all_tasks(loop):
+        for task in asyncio_all_tasks(loop):
             task.cancel()
 
     if platform.system() != "Windows":
