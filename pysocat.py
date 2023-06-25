@@ -507,7 +507,7 @@ class SplitSubStreamWriter(AbstractWriter):
 
 
 def asyncio_all_tasks(loop=None):
-    if sys.version_info.major > 6:
+    if sys.version_info.minor > 6:
         return asyncio.all_tasks(loop=loop)
     else:
         return asyncio.Task.all_tasks(loop=loop)
